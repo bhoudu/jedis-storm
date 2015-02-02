@@ -39,6 +39,13 @@
 			<version>${jedis.version}</version>
 		</dependency>
 
+		<!-- Apache commons -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.1</version>
+		</dependency>
+
 		<!-- Log -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
