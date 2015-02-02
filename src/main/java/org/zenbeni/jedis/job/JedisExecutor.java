@@ -51,11 +51,10 @@ public final class JedisExecutor {
 		jedis = null;
 	}
 
-	public static void submitJedisJob(final JedisJob jedisJob) {
-		jedisJob.initConfiguration();
+	public static <T> T submitJedisJob(final JedisJob<T> jedisJob) {
 		jedisJob.initJedis();
-		jedisJob.initExecutor();
 		jedisJob.run();
+		return jedisJob.getResult();
 	}
 
 }

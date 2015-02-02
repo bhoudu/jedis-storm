@@ -7,7 +7,7 @@ import org.zenbeni.jedis.exception.JedisJobException;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
 
-public abstract class JedisJob implements Runnable {
+public abstract class JedisJob<T> implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JedisJob.class);
 
@@ -17,6 +17,7 @@ public abstract class JedisJob implements Runnable {
 	protected JedisJobConfiguration configuration;
 	protected JedisExecutor executor;
 	protected Jedis jedis;
+	protected T result;
 
 	protected int maxRetries = DEFAULT_MAX_RETRIES;
 	protected int backoff = DEFAULT_BACKOFF;
@@ -31,27 +32,32 @@ public abstract class JedisJob implements Runnable {
 		}
 	};
 
-	public void initConfiguration() {
+	public JedisJob() {
+		initConfiguration();
+		initExecutor();
+	}
+
+	protected void initConfiguration() {
 		configuration = new JedisJobConfiguration();
 	}
 
-	public void initExecutor() {
+	protected void initExecutor() {
 		executor = JEDIS_EXECUTOR_THREAD_LOCAL.get();
 		executor.setConfiguration(configuration);
 	}
 
-	public void initJedis() {
+	protected void initJedis() {
 		jedis = executor.spawnJedis();
 	}
 
 	@Override
 	public final void run() {
-		executeJedisJob(0, 0);
+		result = executeJedisJob(0, 0);
 	}
 
-	protected void executeJedisJob(final int retry, final long time) {
+	protected T executeJedisJob(final int retry, final long time) {
 		try {
-			runJedisJob();
+			return runJedisJob();
 		} catch (JedisException e) {
 			LOGGER.warn("{}", e);
 			if (checkJedis(jedis)) {
@@ -67,11 +73,15 @@ public abstract class JedisJob implements Runnable {
 			} catch (InterruptedException e1) {
 				LOGGER.warn("Interrupted sleep? {} Pool:{}", e1, executor);
 			}
-			executeJedisJob(retry + 1, time + delay);
+			return executeJedisJob(retry + 1, time + delay);
 		}
 	}
 
-	public abstract void runJedisJob();
+	public abstract T runJedisJob();
+
+	public T getResult() {
+		return result;
+	}
 
 	/**
 	 * Test if jedis can ping redis

@@ -8,7 +8,7 @@ public class JedisJobTest {
 
 	@Test
 	public void basicTest() {
-		JedisExecutor.submitJedisJob(new JedisJob() {
+		JedisExecutor.submitJedisJob(new JedisSimpleJob() {
 
 			@Override
 			public void initJedis() {
@@ -16,7 +16,7 @@ public class JedisJobTest {
 			}
 
 			@Override
-			public void runJedisJob() {
+			public void runSimpleJob() {
 				jedis.set("test", "valeur");
 			}
 		});
