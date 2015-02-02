@@ -16,7 +16,7 @@ import redis.clients.jedis.exceptions.JedisException;
  * Wrapper of lua script which always try to eval with sha1 id on redis.
  * If the script does not exist, it catches the exception from redis and sends the script again.
  */
-public class LuaScript<T> implements Serializable {
+public class LuaScript<T> implements Serializable, Cloneable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LuaScript.class);
 
@@ -88,6 +88,11 @@ public class LuaScript<T> implements Serializable {
 	@Override
 	public String toString() {
 		return name + '@' + Integer.toHexString(hashCode());
+	}
+
+	@Override
+	protected Object clone() {
+		return new LuaScript<>(name, luaScript, sha1, path);
 	}
 
 }
