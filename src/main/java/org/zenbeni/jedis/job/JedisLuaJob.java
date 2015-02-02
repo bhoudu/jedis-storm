@@ -29,6 +29,7 @@ public abstract class JedisLuaJob<T> extends JedisJob<T> {
 
 	@Override
 	public T runJedisJob() {
+		initKeysAndArgv();
 		LOGGER.debug("Calling lua script:{} with KEYS:{} and ARGV:{}", luaScript, keys, argv);
 		return luaScript.eval(jedis, keys, argv);
 	}
