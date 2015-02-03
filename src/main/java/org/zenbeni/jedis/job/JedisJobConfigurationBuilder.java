@@ -32,6 +32,11 @@ public final class JedisJobConfigurationBuilder {
 		return this;
 	}
 
+	public JedisJobConfigurationBuilder withPassword(final String password) {
+		configuration.setPassword(password);
+		return this;
+	}
+
 	public JedisJobConfiguration build() {
 		return configuration;
 	}

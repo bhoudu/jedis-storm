@@ -35,6 +35,14 @@ public final class JedisExecutor {
 			return jedis;
 		} else {
 			jedis = new Jedis(configuration.getHost(), configuration.getPort(), configuration.getTimeout());
+			if (configuration.getPassword() != null) {
+				final String auth = jedis.auth(configuration.getPassword());
+				if ("OK".equals(auth)) {
+					LOGGER.debug("AUTH SUCCEDEED:{}", jedis);
+				} else {
+					LOGGER.warn("NOTOK AUTH ON REDIS:{}", jedis);
+				}
+			}
 			jedis.select(configuration.getDatabase());
 			return jedis;
 		}

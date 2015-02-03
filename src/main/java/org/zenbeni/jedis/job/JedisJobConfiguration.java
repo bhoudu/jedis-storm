@@ -2,12 +2,16 @@ package org.zenbeni.jedis.job;
 
 import redis.clients.jedis.Protocol;
 
-class JedisJobConfiguration {
+public class JedisJobConfiguration {
 
 	private String host = "localhost";
 	private int port = Protocol.DEFAULT_PORT;
 	private int timeout = Protocol.DEFAULT_TIMEOUT;
 	private int database;
+	private String password;
+
+	JedisJobConfiguration() {
+	}
 
 	@Override
 	public boolean equals(final Object o) {
@@ -27,7 +31,13 @@ class JedisJobConfiguration {
 		if (timeout != that.timeout) {
 			return false;
 		}
-		return host.equals(that.host);
+		if (!host.equals(that.host)) {
+			return false;
+		}
+		if (password != null ? !password.equals(that.password) : that.password != null) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -36,6 +46,7 @@ class JedisJobConfiguration {
 		result = 31 * result + port;
 		result = 31 * result + timeout;
 		result = 31 * result + database;
+		result = 31 * result + (password != null ? password.hashCode() : 0);
 		return result;
 	}
 
@@ -69,6 +80,14 @@ class JedisJobConfiguration {
 
 	public void setDatabase(final int database) {
 		this.database = database;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(final String password) {
+		this.password = password;
 	}
 
 }
