@@ -31,10 +31,12 @@ public abstract class JedisLuaJob<T> extends JedisJob<T> {
 	@Override
 	public T runJedisJob() {
 		initKeysAndArgv();
-		LOGGER.debug("Calling lua script:{} with KEYS:{} and ARGV:{}", luaScript, keys, argv);
+		LOGGER.debug("Calling lua script:{} jedis:{} with KEYS:{} and ARGV:{}", luaScript, jedis, keys, argv);
 		// Get an instance from current thread or put it in cache (1 LuaScript per thread)
 		final LuaScript<T> script = LuaScriptThreadLocalCache.getLuaScript(luaScript);
-		return script.eval(jedis, keys, argv);
+		final T result = script.eval(jedis, keys, argv);
+		LOGGER.debug("Result for lua script:{} jedis:{} result:{}", luaScript, jedis, result);
+		return result;
 	}
 
 }
