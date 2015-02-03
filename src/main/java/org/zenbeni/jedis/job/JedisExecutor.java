@@ -1,5 +1,6 @@
 package org.zenbeni.jedis.job;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ public final class JedisExecutor {
 			return jedis;
 		} else {
 			jedis = new Jedis(configuration.getHost(), configuration.getPort(), configuration.getTimeout());
-			if (configuration.getPassword() != null) {
+			if (!StringUtils.isEmpty(configuration.getPassword())) {
 				final String auth = jedis.auth(configuration.getPassword());
 				if ("OK".equals(auth)) {
 					LOGGER.debug("AUTH SUCCEDEED:{}", jedis);

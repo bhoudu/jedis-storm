@@ -1,6 +1,16 @@
 package org.zenbeni.jedis.job;
 
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+
 public final class JedisJobConfigurationBuilder {
+
+	public static final String REDIS_HOST_PROPERTY = "redis.host";
+	public static final String REDIS_PORT_PROPERTY = "redis.port";
+	public static final String REDIS_PASSWORD_PROPERTY = "redis.password";
+	public static final String REDIS_DATABASE_PROPERTY = "redis.database";
+	public static final String REDIS_TIMEOUT_PROPERTY = "redis.timeout";
 
 	public static JedisJobConfigurationBuilder create() {
 		return new JedisJobConfigurationBuilder();
@@ -35,6 +45,44 @@ public final class JedisJobConfigurationBuilder {
 	public JedisJobConfigurationBuilder withPassword(final String password) {
 		configuration.setPassword(password);
 		return this;
+	}
+
+	public JedisJobConfigurationBuilder withConfiguration(final Map conf) {
+		final String host = getProperty(conf, REDIS_HOST_PROPERTY);
+		withHost(host);
+		final String password = getProperty(conf, REDIS_PASSWORD_PROPERTY);
+		if (!StringUtils.isEmpty(password)) {
+			withPassword(password);
+		}
+		final int port = getPropertyAsInteger(conf, REDIS_PORT_PROPERTY);
+		if (port >= 0) {
+			withPort(port);
+		}
+		final int timeout = getPropertyAsInteger(conf, REDIS_TIMEOUT_PROPERTY);
+		if (timeout >= 0) {
+			withTimeout(timeout);
+		}
+		final int database = getPropertyAsInteger(conf, REDIS_DATABASE_PROPERTY);
+		if (database >= 0) {
+			withDatabase(database);
+		}
+		return this;
+	}
+
+	static String getProperty(final Map conf, final String property) {
+		final Object item = conf.get(property);
+		if (item != null) {
+			return (String) item;
+		}
+		return null;
+	}
+
+	static int getPropertyAsInteger(final Map conf, final String property) {
+		final String item = getProperty(conf, property);
+		if (item != null) {
+			return Integer.parseInt(item);
+		}
+		return -1;
 	}
 
 	public JedisJobConfiguration build() {
