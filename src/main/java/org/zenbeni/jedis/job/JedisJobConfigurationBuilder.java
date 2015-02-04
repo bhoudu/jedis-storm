@@ -2,6 +2,7 @@ package org.zenbeni.jedis.job;
 
 import java.util.Map;
 
+import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang.StringUtils;
 
 public final class JedisJobConfigurationBuilder {
@@ -63,6 +64,28 @@ public final class JedisJobConfigurationBuilder {
 			withTimeout(timeout);
 		}
 		final int database = getPropertyAsInteger(conf, REDIS_DATABASE_PROPERTY);
+		if (database >= 0) {
+			withDatabase(database);
+		}
+		return this;
+	}
+
+	public JedisJobConfigurationBuilder withConfiguration(final Configuration conf) {
+		final String host = conf.getString(REDIS_HOST_PROPERTY);
+		withHost(host);
+		final String password = conf.getString(REDIS_PASSWORD_PROPERTY);
+		if (!StringUtils.isEmpty(password)) {
+			withPassword(password);
+		}
+		final int port = conf.getInt(REDIS_PORT_PROPERTY);
+		if (port >= 0) {
+			withPort(port);
+		}
+		final int timeout = conf.getInt(REDIS_TIMEOUT_PROPERTY);
+		if (timeout >= 0) {
+			withTimeout(timeout);
+		}
+		final int database = conf.getInt(REDIS_DATABASE_PROPERTY);
 		if (database >= 0) {
 			withDatabase(database);
 		}
