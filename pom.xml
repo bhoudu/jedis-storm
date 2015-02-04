@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.zenbeni</groupId>
 	<artifactId>jedis-storm</artifactId>
@@ -39,6 +40,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>1.9</version>
 		</dependency>
 
 		<!-- Log -->
@@ -159,6 +165,6 @@
 		<connection>scm:git:git://github.com/bhoudu/jedis-storm</connection>
 		<url>git://github.com/bhoudu/jedis-storm</url>
 		<developerConnection>scm:git:git://github.com/bhoudu/jedis-storm</developerConnection>
-  </scm>
+	</scm>
 
 </project>
