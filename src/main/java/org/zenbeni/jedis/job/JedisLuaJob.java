@@ -3,6 +3,7 @@ package org.zenbeni.jedis.job;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zenbeni.jedis.lua.LuaScript;
@@ -43,7 +44,11 @@ public abstract class JedisLuaJob<T> extends JedisJob<T> {
 	@Override
 	public T runJedisJob() {
 		initKeysAndArgv();
-		LOGGER.debug("Calling lua script:{} jedis:{} with KEYS:{} and ARGV:{}", luaScript, jedis, keys, argv);
+		LOGGER.debug("Calling lua script:{} jedis:{} with KEYS:{} and ARGV:{}",
+		             luaScript,
+		             jedis,
+		             StringUtils.abbreviate(keys.toString(), 50),
+		             StringUtils.abbreviate(argv.toString(), 50));
 		// Get an instance from current thread or put it in cache (1 LuaScript per thread)
 		final LuaScript<T> script = LuaScriptThreadLocalCache.getLuaScript(luaScript);
 		final T result = script.eval(jedis, keys, argv);
