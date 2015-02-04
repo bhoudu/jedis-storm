@@ -37,6 +37,11 @@ public abstract class JedisJob<T> implements Runnable {
 		initExecutor();
 	}
 
+	public JedisJob(final JedisJobConfiguration configuration) {
+		this.configuration = configuration;
+		initExecutor();
+	}
+
 	protected void initConfiguration() {
 		configuration = new JedisJobConfiguration();
 	}
