@@ -13,18 +13,30 @@ public abstract class JedisLuaJob<T> extends JedisJob<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JedisLuaJob.class);
 
 	protected LuaScript<T> luaScript;
-	protected List<String> keys = new ArrayList<>();
-	protected List<String> argv = new ArrayList<>();
+	protected final List<String> keys = new ArrayList<>();
+	protected final List<String> argv = new ArrayList<>();
 
-	public abstract void initLuaScript();
+	public JedisLuaJob() {
+	}
+
+	public JedisLuaJob(final JedisJobConfiguration configuration) {
+		super(configuration);
+	}
+
+	public JedisLuaJob(final JedisJobConfiguration configuration, final LuaScript<T> luaScript) {
+		super(configuration);
+		this.luaScript = luaScript;
+	}
 
 	@Override
-	public void initExecutor() {
+	protected void initExecutor() {
 		super.initExecutor();
 		initLuaScript();
 	}
 
-	public void initKeysAndArgv() {
+	protected abstract void initLuaScript();
+
+	protected void initKeysAndArgv() {
 		LOGGER.debug("Init keys and argv before calling lua script:{}", luaScript);
 	}
 
