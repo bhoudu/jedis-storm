@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.zenbeni.jedis.exception.JedisJobException;
 import org.zenbeni.jedis.lua.LuaScript;
 import org.zenbeni.jedis.lua.LuaScriptThreadLocalCache;
 
@@ -33,9 +34,14 @@ public abstract class JedisLuaJob<T> extends JedisJob<T> {
 	protected void initExecutor() {
 		super.initExecutor();
 		initLuaScript();
+		if (luaScript == null) {
+			throw new JedisJobException("No lua script was defined for the job!");
+		}
 	}
 
-	protected abstract void initLuaScript();
+	protected void initLuaScript() {
+		LOGGER.debug("Init keys and argv before calling lua script:{}", luaScript);
+	}
 
 	protected void initKeysAndArgv() {
 		LOGGER.debug("Init keys and argv before calling lua script:{}", luaScript);
