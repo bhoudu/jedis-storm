@@ -1,0 +1,6 @@
+language: java
+script: mvn clean install -Dmaven.test.skip
+jdk:
+- openjdk7
+- oraclejdk7
+- oraclejdk8
