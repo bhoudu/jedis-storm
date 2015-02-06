@@ -19,21 +19,28 @@ public abstract class JedisLuaJob<T> extends JedisJob<T> {
 	protected final List<String> argv = new ArrayList<>();
 
 	public JedisLuaJob() {
+		this(new JedisJobConfiguration());
 	}
 
-	public JedisLuaJob(final JedisJobConfiguration configuration) {
-		super(configuration);
+	public JedisLuaJob(final JedisJobConfiguration jobConfiguration) {
+		this(jobConfiguration, null);
 	}
 
-	public JedisLuaJob(final JedisJobConfiguration configuration, final LuaScript<T> luaScript) {
-		super(configuration);
-		this.luaScript = luaScript;
+	public JedisLuaJob(final JedisJobConfiguration jobConfiguration, final LuaScript<T> script) {
+		super(jobConfiguration);
+		luaScript = script;
 	}
 
 	@Override
-	protected void initExecutor() {
-		super.initExecutor();
+	protected void init() {
+		super.init();
 		initLuaScript();
+		initKeysAndArgv();
+	}
+
+	@Override
+	protected void checkConfiguration() {
+		super.checkConfiguration();
 		if (luaScript == null) {
 			throw new JedisJobException("No lua script was defined for the job!");
 		}
@@ -49,7 +56,6 @@ public abstract class JedisLuaJob<T> extends JedisJob<T> {
 
 	@Override
 	public T runJedisJob() {
-		initKeysAndArgv();
 		LOGGER.debug("Calling lua script:{} jedis:{} with KEYS:{} and ARGV:{}",
 		             luaScript,
 		             jedis,

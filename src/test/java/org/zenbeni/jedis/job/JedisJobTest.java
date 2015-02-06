@@ -11,12 +11,8 @@ public class JedisJobTest {
 		JedisExecutor.submitJedisJob(new JedisSimpleJob() {
 
 			@Override
-			public void initJedis() {
-				jedis = new MockJedis("test");
-			}
-
-			@Override
 			public void runSimpleJob() {
+				jedis = new MockJedis("test");
 				jedis.set("test", "valeur");
 			}
 		});

@@ -33,17 +33,20 @@ public abstract class JedisJob<T> implements Runnable {
 	};
 
 	public JedisJob() {
-		initConfiguration();
-		initExecutor();
+		this(new JedisJobConfiguration());
 	}
 
 	public JedisJob(final JedisJobConfiguration configuration) {
 		this.configuration = configuration;
+	}
+
+	protected void init() {
+		initConfiguration();
 		initExecutor();
 	}
 
 	protected void initConfiguration() {
-		configuration = new JedisJobConfiguration();
+		LOGGER.debug("Job configuration:{}", configuration);
 	}
 
 	protected void initExecutor() {
@@ -51,12 +54,18 @@ public abstract class JedisJob<T> implements Runnable {
 		executor.setConfiguration(configuration);
 	}
 
-	protected void initJedis() {
-		jedis = executor.spawnJedis();
+	protected void checkConfiguration() {
+		if (configuration == null) {
+			throw new JedisJobException("No jedis configuration was provided!");
+		}
+		if (executor == null) {
+			throw new JedisJobException("No jedis executor was defined!");
+		}
 	}
 
 	@Override
 	public final void run() {
+		jedis = executor.spawnJedis();
 		result = executeJedisJob(0, 0);
 	}
 
@@ -91,7 +100,7 @@ public abstract class JedisJob<T> implements Runnable {
 	/**
 	 * Test if jedis can ping redis
 	 *
-	 * @param jedis
+	 * @param jedis not thread safe instance of jedis, do not share!
 	 * @return true if it is a safe jedis instance
 	 */
 	static boolean checkJedis(final Jedis jedis) {
@@ -100,6 +109,7 @@ public abstract class JedisJob<T> implements Runnable {
 		} catch (JedisException e) {
 			LOGGER.warn("Error on jedis! {}", e);
 			try {
+				// Try to kindly close the connection.
 				jedis.close();
 			} catch (JedisException f) {
 				LOGGER.warn("Error on jedis! {}", f);

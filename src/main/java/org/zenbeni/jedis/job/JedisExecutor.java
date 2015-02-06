@@ -3,6 +3,7 @@ package org.zenbeni.jedis.job;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.zenbeni.jedis.exception.JedisJobException;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
@@ -41,7 +42,8 @@ public final class JedisExecutor {
 				if ("OK".equals(auth)) {
 					LOGGER.debug("AUTH SUCCEDEED:{}", jedis);
 				} else {
-					LOGGER.warn("NOTOK AUTH ON REDIS:{}", jedis);
+					final String message = String.format("NOT AUTHORIZED TO LOG IN REDIS:%s", configuration);
+					throw new JedisJobException(message);
 				}
 			}
 			jedis.select(configuration.getDatabase());
@@ -61,7 +63,8 @@ public final class JedisExecutor {
 	}
 
 	public static <T> T submitJedisJob(final JedisJob<T> jedisJob) {
-		jedisJob.initJedis();
+		jedisJob.init();
+		jedisJob.checkConfiguration();
 		jedisJob.run();
 		return jedisJob.getResult();
 	}

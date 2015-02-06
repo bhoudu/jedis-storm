@@ -3,6 +3,7 @@ package org.zenbeni.jedis.job;
 public abstract class JedisSimpleJob extends JedisJob<Void> {
 
 	public JedisSimpleJob() {
+		this(new JedisJobConfiguration());
 	}
 
 	public JedisSimpleJob(final JedisJobConfiguration configuration) {
