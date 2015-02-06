@@ -1,9 +1,13 @@
 package org.zenbeni.jedis.job;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zenbeni.jedis.exception.JedisJobException;
+import org.zenbeni.jedis.lua.LuaScript;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
@@ -63,6 +67,16 @@ public final class JedisExecutor {
 	}
 
 	/**
+	 * Store one jedis executor per thread (storm executor)
+	 */
+	static final ThreadLocal<JedisExecutor> JEDIS_EXECUTOR_THREAD_LOCAL = new ThreadLocal<JedisExecutor>() {
+		@Override
+		protected JedisExecutor initialValue() {
+			return new JedisExecutor();
+		}
+	};
+
+	/**
 	 * Execute a JedisJob against Redis.
 	 * This method is thread-safe and can be safely called in any Bolt / Spout.
 	 * It supports an exponential backoff policy to automatically retry failed jobs.
@@ -79,14 +93,27 @@ public final class JedisExecutor {
 		return jedisJob.getResult();
 	}
 
-	/**
-	 * Store one jedis executor per thread (storm executor)
-	 */
-	static final ThreadLocal<JedisExecutor> JEDIS_EXECUTOR_THREAD_LOCAL = new ThreadLocal<JedisExecutor>() {
-		@Override
-		protected JedisExecutor initialValue() {
-			return new JedisExecutor();
-		}
-	};
+	public static <T> T submitLuaJob(final LuaScript<T> script) {
+		return submitLuaJob(new JedisJobConfiguration(), script);
+	}
+
+	public static <T> T submitLuaJob(final JedisJobConfiguration jobConfiguration, final LuaScript<T> script) {
+		return submitLuaJob(jobConfiguration, script, Collections.<String>emptyList());
+	}
+
+	public static <T> T submitLuaJob(final JedisJobConfiguration jobConfiguration, final LuaScript<T> script, final List<String> keysJob) {
+		return submitLuaJob(jobConfiguration, script, keysJob, Collections.<String>emptyList());
+	}
+
+	public static <T> T submitLuaJob(final JedisJobConfiguration jobConfiguration, final LuaScript<T> script, final List<String> keysJob, final List<String> argvJob) {
+		final JedisLuaJob<T> job = new JedisLuaJob<T>(jobConfiguration, script) {
+			@Override
+			protected void initKeysAndArgv() {
+				keys.addAll(keysJob);
+				argv.addAll(argvJob);
+			}
+		};
+		return submitJedisJob(job);
+	}
 
 }

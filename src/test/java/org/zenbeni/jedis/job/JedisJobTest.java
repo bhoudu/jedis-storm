@@ -1,5 +1,7 @@
 package org.zenbeni.jedis.job;
 
+import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -23,7 +25,6 @@ public class JedisJobTest {
 		final String key = "my.key.test";
 		final String value = "value.of.test";
 		JedisExecutor.submitJedisJob(new JedisSimpleJob(jobConfiguration) {
-
 			@Override
 			public void runSimpleJob() {
 				jedis.set(key, value);
@@ -52,6 +53,10 @@ public class JedisJobTest {
 		});
 		LOGGER.info("Result:{}", result);
 		Assert.assertEquals(result, "hello world:" + key + " " + arg);
+
+		final String resultOther = JedisExecutor.submitLuaJob(jobConfiguration, script, Arrays.asList(key), Arrays.asList(arg));
+		LOGGER.info("Result:{}", resultOther);
+		Assert.assertEquals(resultOther, "hello world:" + key + " " + arg);
 	}
 
 }
