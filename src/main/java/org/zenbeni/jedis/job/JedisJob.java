@@ -7,6 +7,12 @@ import org.zenbeni.jedis.exception.JedisJobException;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisException;
 
+/**
+ * Represents a job to be executed against redis.
+ * It is used with JedisExecutor to ensure thread-safety which is critical in Storm.
+ *
+ * @param <T> the result type of the JedisJob.
+ */
 public abstract class JedisJob<T> implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JedisJob.class);
@@ -19,18 +25,8 @@ public abstract class JedisJob<T> implements Runnable {
 	protected Jedis jedis;
 	protected T result;
 
-	protected int maxRetries = DEFAULT_MAX_RETRIES;
-	protected int backoff = DEFAULT_BACKOFF;
-
-	/**
-	 * Store one jedis executor per thread (storm executor)
-	 */
-	static final ThreadLocal<JedisExecutor> JEDIS_EXECUTOR_THREAD_LOCAL = new ThreadLocal<JedisExecutor>() {
-		@Override
-		protected JedisExecutor initialValue() {
-			return new JedisExecutor();
-		}
-	};
+	protected int maxRetries;
+	protected int backoff;
 
 	public JedisJob() {
 		this(new JedisJobConfiguration());
@@ -42,16 +38,22 @@ public abstract class JedisJob<T> implements Runnable {
 
 	protected void init() {
 		initConfiguration();
-		initExecutor();
+		initBackOffPolicy();
 	}
 
 	protected void initConfiguration() {
 		LOGGER.debug("Job configuration:{}", configuration);
 	}
 
-	protected void initExecutor() {
-		executor = JEDIS_EXECUTOR_THREAD_LOCAL.get();
-		executor.setConfiguration(configuration);
+	protected void initBackOffPolicy() {
+		maxRetries = DEFAULT_MAX_RETRIES;
+		backoff = DEFAULT_BACKOFF;
+		LOGGER.debug("BackOff policy: maxRetries={} backoffFactor={}", maxRetries, backoff);
+	}
+
+	protected void initExecutor(final JedisExecutor executor) {
+		this.executor = executor;
+		this.executor.setConfiguration(configuration);
 	}
 
 	protected void checkConfiguration() {
@@ -91,16 +93,37 @@ public abstract class JedisJob<T> implements Runnable {
 		}
 	}
 
+	/**
+	 * Implementation of the job.
+	 *
+	 * @return whatever you want depending on your implementation.
+	 */
 	public abstract T runJedisJob();
 
 	public T getResult() {
 		return result;
 	}
 
+	public int getMaxRetries() {
+		return maxRetries;
+	}
+
+	public void setMaxRetries(final int maxRetries) {
+		this.maxRetries = maxRetries;
+	}
+
+	public int getBackoff() {
+		return backoff;
+	}
+
+	public void setBackoff(final int backoff) {
+		this.backoff = backoff;
+	}
+
 	/**
 	 * Test if jedis can ping redis
 	 *
-	 * @param jedis not thread safe instance of jedis, do not share!
+	 * @param jedis a not thread safe instance of jedis, do not share!
 	 * @return true if it is a safe jedis instance
 	 */
 	static boolean checkJedis(final Jedis jedis) {

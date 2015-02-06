@@ -10,6 +10,12 @@ import org.zenbeni.jedis.exception.JedisJobException;
 import org.zenbeni.jedis.lua.LuaScript;
 import org.zenbeni.jedis.lua.LuaScriptThreadLocalCache;
 
+/**
+ * Represents a JedisJob which is lua script call in redis.
+ * It needs an actual lua script instance to run.
+ *
+ * @param <T> the result type of the lua call.
+ */
 public abstract class JedisLuaJob<T> extends JedisJob<T> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JedisLuaJob.class);
@@ -56,15 +62,15 @@ public abstract class JedisLuaJob<T> extends JedisJob<T> {
 
 	@Override
 	public T runJedisJob() {
-		LOGGER.debug("Calling lua script:{} jedis:{} with KEYS:{} and ARGV:{}",
-		             luaScript,
-		             jedis,
-		             StringUtils.abbreviate(keys.toString(), 50),
-		             StringUtils.abbreviate(argv.toString(), 50));
-		// Get an instance from current thread or put it in cache (1 LuaScript per thread)
+		LOGGER.info("Calling lua script:{} jedis:{} with KEYS:{} and ARGV:{}",
+		            luaScript,
+		            jedis,
+		            StringUtils.abbreviate(keys.toString(), 50),
+		            StringUtils.abbreviate(argv.toString(), 50));
+		// Get an instance from current thread or put it in cache (LuaScript instances should not be shared between threads)
 		final LuaScript<T> script = LuaScriptThreadLocalCache.getLuaScript(luaScript);
 		final T result = script.eval(jedis, keys, argv);
-		LOGGER.debug("Result for lua script:{} jedis:{} result:{}", luaScript, jedis, result);
+		LOGGER.info("Result for lua script:{} jedis:{} result:{}", luaScript, jedis, result);
 		return result;
 	}
 

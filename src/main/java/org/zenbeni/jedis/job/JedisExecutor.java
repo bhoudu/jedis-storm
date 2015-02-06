@@ -62,11 +62,31 @@ public final class JedisExecutor {
 		jedis = null;
 	}
 
+	/**
+	 * Execute a JedisJob against Redis.
+	 * This method is thread-safe and can be safely called in any Bolt / Spout.
+	 * It supports an exponential backoff policy to automatically retry failed jobs.
+	 *
+	 * @param jedisJob implementation of a job against redis.
+	 * @param <T>      the result type of the JedisJob
+	 * @return the result of the JedisJob
+	 */
 	public static <T> T submitJedisJob(final JedisJob<T> jedisJob) {
 		jedisJob.init();
+		jedisJob.initExecutor(JEDIS_EXECUTOR_THREAD_LOCAL.get());
 		jedisJob.checkConfiguration();
 		jedisJob.run();
 		return jedisJob.getResult();
 	}
+
+	/**
+	 * Store one jedis executor per thread (storm executor)
+	 */
+	static final ThreadLocal<JedisExecutor> JEDIS_EXECUTOR_THREAD_LOCAL = new ThreadLocal<JedisExecutor>() {
+		@Override
+		protected JedisExecutor initialValue() {
+			return new JedisExecutor();
+		}
+	};
 
 }
