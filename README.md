@@ -14,10 +14,42 @@ Again it is unsatisfaying as you will have to monitor it, size it correctly when
 
 If you have a lot of data to manipulate at once and not enough resources in your pool, storm will slow down or fail and in the worst case, kill the worker.
 
+We don't want to use this anymore:
+
+	@Deprecated
+	public final class RedisFactory {
+
+		public static JedisPool getJedisPool(final Map stormConfiguration) {
+			if (null == jedisPool) {
+				synchronized (RedisFactory.class) {
+					if (null == jedisPool) {
+						jedisPool = createJedisPool(stormConfiguration);
+					}
+				}
+			}
+			return jedisPool;
+		}
+
+		// ... more code
+	}
+
 JedisJob and exponential backoff policy
 ---------------------------------------
 
 As the network can become unreliable (if saturation is quite high for instance), jedis-storm defines jobs to be executed and retried if they fail with an exponential backoff policy which can be overwritten if needed.
+
+	final JedisJobConfiguration jobConfiguration = JedisJobConfigurationBuilder.create()
+	  .withConfiguration(stormConfiguration)
+	  .build();
+
+	JedisExecutor.submitJedisJob(new JedisSimpleJob(jobConfiguration) {
+
+		@Override
+		public void runSimpleJob() {
+			final String value = jedis.get("some.key");
+			jedis.set(value, "another.value");
+		}
+	}
 
 Jedis-storm, storm executors and tasks
 --------------------------------------
@@ -35,5 +67,14 @@ Making lua calls easier
 
 Lua scripts are really important when using Redis. They are atomic, and as they run in Redis, they allow less roundtrips on the network. Jedis-storm provides a class LuaScript that can read lua scripts provided in the classpath and execute them with JedisLuaJob thanks to jedis-storm job API.
 
-Still, beware of threshold issues, as a timeout can make a lua script fail (taking too much time). For instance, if it is a cleaning task that fails with a lua timeout, its chances to succeed become fewer as time goes: redis become bigger and bigger and the cleaning script needs even more time than before to run.
+	final JedisJobConfiguration jobConfiguration = JedisJobConfigurationBuilder.create()
+	    .withConfiguration(stormConfiguration)
+	    .build();
 
+	// Build a LuaScript wrapper from lua script present in classpath, it returns a String
+	final LuaScript<String> luaScript = LuaScript.buildFromPath("/lua/script.lua");
+	
+	// Get the result from Lua converted to Java thanks to Jedis
+	final String result = JedisExecutor.submitLuaJob(jobConfiguration, luaScript);
+
+Still, beware of threshold issues, as a timeout can make a lua script fail (taking too much time). For instance, if it is a cleaning task that fails with a lua timeout, its chances to succeed become fewer as time goes: redis become bigger and bigger and the cleaning script needs even more time than before to run.
