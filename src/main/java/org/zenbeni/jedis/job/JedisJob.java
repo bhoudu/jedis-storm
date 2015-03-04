@@ -74,21 +74,29 @@ public abstract class JedisJob<T> implements Runnable {
 	protected T executeJedisJob(final int retry, final long time) {
 		try {
 			return runJedisJob();
+
 		} catch (JedisException e) {
-			LOGGER.warn("{}", e);
+
+			// Check if jedis instance is safe
 			if (checkJedis(jedis)) {
-				throw new JedisJobException("Error on JedisJob:{}", e);
+				throw new JedisJobException("Error on JedisJob, bad jedis instance", e);
 			}
+
+			// Check if exponential backoff is still active
 			if (retry >= maxRetries) {
 				final String message = String.format("Could not build a safe jedis instance. Is redis up? Waited:%sms tried:%s", time, maxRetries);
-				throw new JedisJobException(message);
+				throw new JedisJobException(message, e);
 			}
+
+			// Sleep when exponential backoff is active
 			final long delay = delay(backoff, retry);
 			try {
 				Thread.sleep(delay);
 			} catch (InterruptedException e1) {
 				LOGGER.warn("Interrupted sleep? {} Pool:{}", e1, executor);
 			}
+
+			// Retry execution of JedisJob
 			return executeJedisJob(retry + 1, time + delay);
 		}
 	}
