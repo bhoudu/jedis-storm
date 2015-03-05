@@ -7,7 +7,37 @@
 	<version>1.0.0</version>
 
 	<name>jedis-storm</name>
+	<description>A library to make the use of jedis inside a storm cluster easier and reliable</description>
 	<url>https://github.com/bhoudu/jedis-storm</url>
+
+	<scm>
+		<url>https://github.com/bhoudu/jedis-storm</url>
+		<connection>scm:git:git@github.com:bhoudu/jedis-storm.git</connection>
+		<developerConnection>scm:git:git@github.com:bhoudu/jedis-storm.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
+
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/bhoudu/jedis-storm/issues</url>
+	</issueManagement>
+
+	<developers>
+		<developer>
+			<id>bhoudu</id>
+			<name>Benjamin Houdu</name>
+			<roles>
+				<role>Original Author</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>BSD 3-Clause License</name>
+			<url>http://github.com/bhoudu/jedis-storm/raw/master/LICENSE</url>
+		</license>
+	</licenses>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -124,11 +154,5 @@
 			</resource>
 		</resources>
 	</build>
-
-	<scm>
-		<connection>scm:git:git://github.com/bhoudu/jedis-storm</connection>
-		<url>git://github.com/bhoudu/jedis-storm</url>
-		<developerConnection>scm:git:git://github.com/bhoudu/jedis-storm</developerConnection>
-	</scm>
 
 </project>
