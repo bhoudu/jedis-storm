@@ -1,6 +1,8 @@
 jedis-storm
 ===========
 
+[![Build Status](https://travis-ci.org/bhoudu/jedis-storm.svg?branch=master)](https://travis-ci.org/bhoudu/jedis-storm)
+
 A library to make the use of jedis inside a storm cluster easier and reliable.
 
 The problematic of JedisPool with Storm
