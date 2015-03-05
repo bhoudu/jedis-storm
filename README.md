@@ -24,6 +24,23 @@ Here is a classic example of how the JedisJob API can be used, with a configurat
 		}
 	}
 
+Making lua calls easier
+-----------------------
+
+Lua scripts are really important when using Redis. They are atomic, and as they run in Redis, they allow less roundtrips on the network. Jedis-storm provides a class LuaScript that can read lua scripts provided in the classpath and execute them with JedisLuaJob thanks to jedis-storm job API.
+
+	final JedisJobConfiguration jobConfiguration = JedisJobConfigurationBuilder.create()
+	    .withConfiguration(stormConfiguration)
+	    .build();
+
+	// Build a LuaScript wrapper from lua script present in classpath, it returns a String
+	final LuaScript<String> luaScript = LuaScript.buildFromPath("/lua/script.lua");
+	
+	// Get the result from Lua converted to Java thanks to Jedis
+	final String result = JedisExecutor.submitLuaJob(jobConfiguration, luaScript);
+
+Still, beware of threshold issues, as a timeout can make a lua script fail (taking too much time). For instance, if it is a cleaning task that fails with a lua timeout, its chances to succeed become fewer as time goes: redis become bigger and bigger and the cleaning script needs even more time than before to run.
+
 Jedis-storm, storm executors and tasks
 --------------------------------------
 
@@ -64,20 +81,3 @@ We don't want to use this anymore:
 
 		// ... more code
 	}
-
-Making lua calls easier
------------------------
-
-Lua scripts are really important when using Redis. They are atomic, and as they run in Redis, they allow less roundtrips on the network. Jedis-storm provides a class LuaScript that can read lua scripts provided in the classpath and execute them with JedisLuaJob thanks to jedis-storm job API.
-
-	final JedisJobConfiguration jobConfiguration = JedisJobConfigurationBuilder.create()
-	    .withConfiguration(stormConfiguration)
-	    .build();
-
-	// Build a LuaScript wrapper from lua script present in classpath, it returns a String
-	final LuaScript<String> luaScript = LuaScript.buildFromPath("/lua/script.lua");
-	
-	// Get the result from Lua converted to Java thanks to Jedis
-	final String result = JedisExecutor.submitLuaJob(jobConfiguration, luaScript);
-
-Still, beware of threshold issues, as a timeout can make a lua script fail (taking too much time). For instance, if it is a cleaning task that fails with a lua timeout, its chances to succeed become fewer as time goes: redis become bigger and bigger and the cleaning script needs even more time than before to run.
