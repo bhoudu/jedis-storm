@@ -95,7 +95,11 @@ public final class JedisJobConfigurationBuilder {
 	static String getProperty(final Map conf, final String property) {
 		final Object item = conf.get(property);
 		if (item != null) {
-			return (String) item;
+			if (item instanceof String) {
+				return (String) item;
+			} else {
+				return item.toString();
+			}
 		}
 		return null;
 	}
