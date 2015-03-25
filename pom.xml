@@ -7,7 +7,7 @@
 	<version>1.0.0</version>
 
 	<name>jedis-storm</name>
-	<description>A library to make the use of jedis inside a storm cluster easier and reliable</description>
+	<description>A library to make the use of jedis inside a storm cluster easy and reliable</description>
 	<url>https://github.com/bhoudu/jedis-storm</url>
 
 	<scm>
