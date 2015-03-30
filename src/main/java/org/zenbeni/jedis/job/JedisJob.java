@@ -73,7 +73,11 @@ public abstract class JedisJob<T> implements Runnable {
 
 	protected T executeJedisJob(final int retry, final long time) {
 		try {
-			return runJedisJob();
+			final T result = runJedisJob();
+			if (time > 0 || retry > 0) {
+				LOGGER.warn("Result:{} on retry:{} time:{}", result, retry, time);
+			}
+			return result;
 
 		} catch (JedisException e) {
 
@@ -137,16 +141,20 @@ public abstract class JedisJob<T> implements Runnable {
 	static boolean checkJedis(final Jedis jedis) {
 		try {
 			jedis.ping();
+
 		} catch (JedisException e) {
 			LOGGER.warn("Error on jedis! {}", e);
 			try {
 				// Try to kindly close the connection.
 				jedis.close();
+
 			} catch (JedisException f) {
 				LOGGER.warn("Error on jedis! {}", f);
 			}
+
 			return false;
 		}
+
 		return true;
 	}
 
