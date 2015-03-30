@@ -101,7 +101,11 @@ public abstract class JedisJob<T> implements Runnable {
 			}
 
 			// Retry execution of JedisJob
-			return executeJedisJob(retry + 1, time + delay);
+			final long nextTime = time + delay;
+			final int nextTry = retry + 1;
+			LOGGER.warn("Failed to complete job, next try:{} time:{}", nextTry, nextTime);
+
+			return executeJedisJob(nextTry, nextTime);
 		}
 	}
 
